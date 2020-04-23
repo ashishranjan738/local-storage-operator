@@ -8,6 +8,7 @@ require (
 	github.com/openshift/api v3.9.1-0.20190924102528-32369d4db2ad+incompatible
 	github.com/openshift/client-go v0.0.0-20200116152001-92a2713fa240
 	github.com/openshift/library-go v0.0.0-20200314142707-3c25293448b0
+	github.com/openshift/sig-storage-local-static-provisioner v2.3.3-0.20200415071547-424ccbd206b3+incompatible
 	github.com/operator-framework/operator-sdk v0.16.0
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/common v0.7.0

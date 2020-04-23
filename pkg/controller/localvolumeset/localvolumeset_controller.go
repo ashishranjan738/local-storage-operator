@@ -8,7 +8,7 @@ import (
 	localv1alpha1 "github.com/openshift/local-storage-operator/pkg/apis/local/v1alpha1"
 	commontypes "github.com/openshift/local-storage-operator/pkg/common"
 	"github.com/openshift/local-storage-operator/pkg/controller/util"
-	"gopkg.in/yaml.v2"
+	localStaticProvisioner "github.com/openshift/sig-storage-local-static-provisioner/pkg/common"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -293,16 +293,21 @@ func (r *ReconcileLocalVolumeSet) getProvisionerConfigMapName(cr *localv1alpha1.
 // generateProvisionerConfigMap Create configmap requires by the local storage provisioner
 func (r *ReconcileLocalVolumeSet) generateProvisionerConfigMap(cr *localv1alpha1.LocalVolumeSet) (*corev1.ConfigMap, error) {
 	provisonerConfigName := r.getProvisionerConfigMapName(cr)
-	configMapData := map[string]string{}
-	configMapData["fstype"] = cr.Spec.FSType
-	configMapData["volumeMode"] = string(cr.Spec.VolumeMode)
-	configMapData["storageClassName"] = cr.Spec.StorageClassName
-	pvLables, err := yaml.Marshal(pvLabels(cr))
+	configMapData, err := localStaticProvisioner.VolumeConfigToConfigMapData(&localStaticProvisioner.ProvisionerConfiguration{
+		StorageClassConfig: map[string]localStaticProvisioner.MountConfig{
+			cr.Spec.StorageClassName: {
+				FsType:     cr.Spec.FSType,
+				HostDir:    util.GetLocalDiskLocationPath(),
+				MountDir:   util.GetLocalDiskLocationPath(),
+				VolumeMode: string(cr.Spec.VolumeMode),
+			},
+		},
+		LabelsForPV:     pvLabels(cr),
+		NodeLabelsForPV: []string{"kubernetes.io/hostname"},
+	})
 	if err != nil {
-		return nil, fmt.Errorf("error creating configmap while marshaling yaml: %+v", err)
+		return nil, err
 	}
-	configMapData["pvLables"] = string(pvLables)
-
 	configmap := &corev1.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -314,7 +319,6 @@ func (r *ReconcileLocalVolumeSet) generateProvisionerConfigMap(cr *localv1alpha1
 			Namespace: cr.Namespace,
 		},
 	}
-
 	configmap.Data = configMapData
 	addOwnerLabels(&configmap.ObjectMeta, cr)
 	return configmap, nil

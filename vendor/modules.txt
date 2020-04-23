@@ -170,6 +170,8 @@ github.com/openshift/library-go/pkg/operator/resource/resourceapply
 github.com/openshift/library-go/pkg/operator/resource/resourcehelper
 github.com/openshift/library-go/pkg/operator/resource/resourcemerge
 github.com/openshift/library-go/pkg/operator/v1helpers
+# github.com/openshift/sig-storage-local-static-provisioner v2.3.3-0.20200415071547-424ccbd206b3+incompatible
+github.com/openshift/sig-storage-local-static-provisioner/pkg/common
 # github.com/operator-framework/operator-sdk v0.16.0
 github.com/operator-framework/operator-sdk/internal/scaffold
 github.com/operator-framework/operator-sdk/internal/scaffold/input
